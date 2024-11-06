@@ -1,0 +1,159 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import confusion_matrix, precision_score, recall_score, accuracy_score, classification_report
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+df=pd.read_csv("C:/Users/DISHA_COMPUTERS/Downloads/diabetes.csv")
+
+df.isnull()
+
+df.head()
+
+x=df.drop("Outcome",axis=1)
+y=df["Outcome"]
+
+scaler=StandardScaler()
+x=scaler.fit_transform(x)
+
+x_train, x_test, y_train, y_test=train_test_split(x,y, test_size=0.3, random_state=42)
+
+k=25
+knn=KNeighborsClassifier(n_neighbors=k)
+
+knn.fit(x_train,y_train)
+
+y_pred=knn.predict(x_test)
+
+confusion_atrix=confusion_matrix(y_test,y_pred)
+
+recall=recall_score(y_test,y_pred)
+
+accuracy=accuracy_score(y_test,y_pred)
+
+precision=precision_score(y_test,y_pred)
+
+error=1-accuracy
+
+cr=classification_report(y_test,y_pred)
+
+print("Confusion Matrix:\n", confusion_atrix)
+print("recall", recall)
+print("accuracy",accuracy)
+print("pecision",precision)
+print("error",error)
+
+plt.figure(figsize=(6, 5))
+sns.heatmap(confusion_atrix, annot=True, fmt="d", cmap="Blues", xticklabels=["Predicted No", "Predicted Yes"], yticklabels=["Actual No", "Actual Yes"])
+plt.xlabel("Predicted Label")
+plt.ylabel("True Label")
+plt.title("Confusion Matrix")
+plt.show()
+
+error_rates = []
+
+# Try KNN with k values from 1 to 20
+for k in range(1, 21):
+    knn = KNeighborsClassifier(n_neighbors=k)
+    knn.fit(x_train, y_train)
+    y_pred_k = knn.predict(x_test)
+    # Calculate the error rate (1 - accuracy)
+    error_rate = 1 - accuracy_score(y_test, y_pred_k)
+    error_rates.append(error_rate)
+
+# Plot the error rates
+plt.figure(figsize=(10, 6))
+plt.plot(range(1, 21), error_rates, color="blue", linestyle="--", marker="o", markerfacecolor="red", markersize=8)
+plt.title("Error Rate vs. K Value")
+plt.xlabel("K Value")
+plt.ylabel("Error Rate")
+plt.show()
+
+print("cr",cr)
+
+
+
+
+
+
+
+
+
+
+
+The classification report is a helpful tool that summarizes the performance of a classification model. It typically includes metrics like precision, recall, F1 score, and support for each class. Here’s a breakdown of each entry you’ll see in a classification report:
+
+1. Precision
+Definition: Precision tells us the accuracy of the positive predictions made by the model. For each class, it represents the ratio of correctly predicted instances of that class to the total instances predicted as that class.
+Formula: 
+Precision
+=
+True Positives
+True Positives
++
+False Positives
+Precision= 
+True Positives+False Positives
+True Positives
+​
+ 
+Interpretation: High precision means that when the model predicts a class, it’s usually right. It’s especially important when false positives are costly.
+2. Recall
+Definition: Recall, also known as sensitivity or true positive rate, is the ratio of correctly predicted instances of a class to all actual instances of that class.
+Formula: 
+Recall
+=
+True Positives
+True Positives
++
+False Negatives
+Recall= 
+True Positives+False Negatives
+True Positives
+​
+ 
+Interpretation: High recall means the model is good at identifying all the actual instances of a class. It’s crucial when false negatives are costly, as in detecting diseases or fraud.
+3. F1 Score
+Definition: The F1 score is the harmonic mean of precision and recall. It balances precision and recall into one metric, making it useful when you want a single performance measure.
+Formula: 
+F1 Score
+=
+2
+×
+Precision
+×
+Recall
+Precision
++
+Recall
+F1 Score=2× 
+Precision+Recall
+Precision×Recall
+​
+ 
+Interpretation: The F1 score is high only if both precision and recall are high. It’s useful when there’s a class imbalance and you want to evaluate the model’s balance between catching positive cases and avoiding false alarms.
+4. Support
+Definition: Support is the number of actual instances of each class in the dataset.
+Interpretation: This number helps you understand the distribution of the dataset across different classes. For instance, if one class has much higher support than others, you’re dealing with an imbalanced dataset, which can affect how you interpret precision, recall, and F1 scores.
+Example of a Classification Report Table
+Here’s what a typical classification report might look like:
+
+Class	Precision	Recall	F1 Score	Support
+Class 0	0.92	0.86	0.89	50
+Class 1	0.83	0.90	0.86	40
+Average	0.88	0.88	0.88	90
+Class 0, Precision 0.92: When the model predicts Class 0, it’s right 92% of the time.
+Class 0, Recall 0.86: Out of all actual Class 0 instances, the model correctly identifies 86%.
+Class 0, F1 Score 0.89: The F1 score balances precision and recall for Class 0.
+Class 0, Support 50: There are 50 actual instances of Class 0 in the dataset.
+The average row (often weighted or macro average) summarizes the overall performance of the model across all classes.
+
+Types of Averages in Classification Reports
+Macro Average: This is the unweighted average of precision, recall, and F1 scores across all classes, treating each class equally. It’s useful if you want a general idea of performance, regardless of class imbalance.
+
+Weighted Average: This is the average of precision, recall, and F1 scores, weighted by each class’s support (number of true instances). It’s useful when there’s class imbalance, as it gives a better idea of how the model performs across the actual dataset distribution.
+
+The classification report helps to understand your model's strengths and weaknesses per class, guiding improvements and fine-tuning.
